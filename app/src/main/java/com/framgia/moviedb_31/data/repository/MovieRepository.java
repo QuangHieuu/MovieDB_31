@@ -44,4 +44,8 @@ public class MovieRepository {
     public Flowable<BaseModel> getMovieByGenres(String genresId, int page) {
         return mRemoteDataSource.getMovieByGenres(genresId, page);
     }
+
+    public Flowable<BaseCredit> getMovieVideo(String movieId) {
+        return mRemoteDataSource.getMovieVideo(movieId);
+    }
 }

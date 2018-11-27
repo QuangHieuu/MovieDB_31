@@ -23,5 +23,6 @@
         <activity android:name=".screen.listMovie.ListMovieActivity"/>
         <activity android:name=".screen.listgenres.ListGenresActivity"/>
         <activity android:name=".screen.movieDetail.MovieDetailActivity"/>
+        <activity android:name=".screen.Youtube"/>
     </application>
 </manifest>

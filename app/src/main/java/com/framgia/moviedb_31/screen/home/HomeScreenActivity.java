@@ -1,8 +1,15 @@
 package com.framgia.moviedb_31.screen.home;
 
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
+import android.databinding.Observable;
+import android.databinding.ObservableField;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -15,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 import com.framgia.moviedb_31.R;
 import com.framgia.moviedb_31.databinding.ActivityHomeScreenBinding;
 import com.framgia.moviedb_31.screen.listMovie.ListMovieActivity;
@@ -26,21 +34,43 @@ import com.framgia.moviedb_31.utils.ItemClickListener;
 public class HomeScreenActivity extends AppCompatActivity
         implements View.OnClickListener, ItemClickListener,
         NavigationView.OnNavigationItemSelectedListener, DrawerLayout.DrawerListener {
+    private static final String CHECK_INTERNET_CONNECTION = "CHECK INTERNET";
+    public static ObservableField<Boolean> mIsConnected;
     private ActivityHomeScreenBinding mBinding;
     private ActionBar mActionBar;
+    private BroadcastReceiver mNetworkStatusReceiver;
+    private MainViewModel mMainViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initView();
+        mIsConnected = new ObservableField<>();
+        mNetworkStatusReceiver = networkStatusReceiver();
+        registerReceiver(mNetworkStatusReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        mIsConnected.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                if (mIsConnected.get()) {
+                    initView();
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mNetworkStatusReceiver);
+        mMainViewModel.onStop();
     }
 
     private void initView() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_home_screen);
-        MainViewModel mainViewModel = new MainViewModel(this);
-        mBinding.setMainviewmodel(mainViewModel);
-        mainViewModel.initData();
-        mainViewModel.getImagePoster();
+        mMainViewModel = new MainViewModel(this);
+        mBinding.setMainviewmodel(mMainViewModel);
+        mMainViewModel.initData();
+        mMainViewModel.getImagePoster();
         mActionBar = getSupportActionBar();
         if (mActionBar != null) {
             mActionBar.setDisplayHomeAsUpEnabled(true);
@@ -149,5 +179,21 @@ public class HomeScreenActivity extends AppCompatActivity
     @Override
     public void onDrawerStateChanged(int i) {
 
+    }
+
+    private static BroadcastReceiver networkStatusReceiver() {
+        return new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(
+                        Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                mIsConnected.set(networkInfo != null && networkInfo.isConnected());
+                if (!mIsConnected.get()) {
+                    Toast.makeText(context, CHECK_INTERNET_CONNECTION, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
     }
 }

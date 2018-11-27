@@ -1,7 +1,6 @@
 package com.framgia.moviedb_31.screen.listMovie;
 
 import android.content.Context;
-import android.databinding.ObservableField;
 import android.widget.Toast;
 import com.framgia.moviedb_31.data.model.BaseModel;
 import com.framgia.moviedb_31.data.repository.MovieRepository;
@@ -17,45 +16,72 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ListMovieViewModel implements ItemClickListener {
 
-    public ObservableField<ListMovieAdapter> mAdapterObservableField;
     private ListMovieAdapter mListMovieAdapter;
     private CompositeDisposable mCompositeDisposable;
     private MovieRepository mMovieRepository;
     private Context mContext;
+    private String mKey;
+    private String mValue;
 
     public ListMovieViewModel(Context context, String key, String value) {
         mContext = context;
-        mAdapterObservableField = new ObservableField<>();
         mListMovieAdapter = new ListMovieAdapter();
         mCompositeDisposable = new CompositeDisposable();
         mMovieRepository = MovieRepository.getInstance(RemoteDataSource.getsInstance());
         mListMovieAdapter.setItemClickListener(this);
-        setQueryData(key, value);
+        mKey = key;
+        mValue = value;
+        setQueryData();
     }
 
-    private void setQueryData(String key, String value) {
-        switch (key) {
+    public ListMovieAdapter getListMovieAdapter() {
+        return mListMovieAdapter;
+    }
+
+    private void setQueryData() {
+        switch (mKey) {
             case Constant.TYPE_SEARCH:
-                getMovieBySearch(value);
+                getMovieBySearch(mValue, Constant.PAGE_DEFAULT);
                 break;
             case Constant.TYPE_CATEGORY:
-                getListMovieByCategory(value);
+                getListMovieByCategory(mValue, Constant.PAGE_DEFAULT);
                 break;
             case Constant.TYPE_GENRES:
-                getMovieByGenres(value);
+                getMovieByGenres(mValue, Constant.PAGE_DEFAULT);
                 break;
         }
     }
 
-    private void getListMovieByCategory(String category) {
-        Disposable disposable = mMovieRepository.getMovieByCategory(category, Constant.PAGE_DEFAULT)
+    public void loadMoreData(int page) {
+        switch (mKey) {
+            case Constant.TYPE_SEARCH:
+                getMovieBySearch(mValue, page);
+                break;
+            case Constant.TYPE_CATEGORY:
+                getListMovieByCategory(mValue, page);
+                break;
+            case Constant.TYPE_GENRES:
+                getMovieByGenres(mValue, page);
+                break;
+        }
+    }
+
+    private void onSetData(int page, BaseModel baseModel) {
+        if (page == Constant.PAGE_DEFAULT) {
+            mListMovieAdapter.updateAdapter(baseModel.getResults());
+        } else {
+            mListMovieAdapter.loadMoreMovie(baseModel.getResults());
+        }
+    }
+
+    private void getListMovieByCategory(String category, final int page) {
+        Disposable disposable = mMovieRepository.getMovieByCategory(category, page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<BaseModel>() {
                     @Override
                     public void accept(BaseModel baseModel) throws Exception {
-                        mAdapterObservableField.set(mListMovieAdapter);
-                        mListMovieAdapter.updateAdapter(baseModel.getResults());
+                        onSetData(page, baseModel);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
@@ -66,15 +92,14 @@ public class ListMovieViewModel implements ItemClickListener {
         mCompositeDisposable.add(disposable);
     }
 
-    private void getMovieBySearch(String query) {
-        Disposable disposable = mMovieRepository.getMovieBySearch(query, Constant.PAGE_DEFAULT)
+    private void getMovieBySearch(String query, final int page) {
+        Disposable disposable = mMovieRepository.getMovieBySearch(query, page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<BaseModel>() {
                     @Override
                     public void accept(BaseModel baseModel) throws Exception {
-                        mAdapterObservableField.set(mListMovieAdapter);
-                        mListMovieAdapter.updateAdapter(baseModel.getResults());
+                        onSetData(page, baseModel);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
@@ -85,15 +110,14 @@ public class ListMovieViewModel implements ItemClickListener {
         mCompositeDisposable.add(disposable);
     }
 
-    private void getMovieByGenres(String query) {
-        Disposable disposable = mMovieRepository.getMovieByGenres(query, Constant.PAGE_DEFAULT)
+    private void getMovieByGenres(String query, final int page) {
+        Disposable disposable = mMovieRepository.getMovieByGenres(query, page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<BaseModel>() {
                     @Override
                     public void accept(BaseModel baseModel) throws Exception {
-                        mAdapterObservableField.set(mListMovieAdapter);
-                        mListMovieAdapter.updateAdapter(baseModel.getResults());
+                        onSetData(page, baseModel);
                     }
                 }, new Consumer<Throwable>() {
                     @Override

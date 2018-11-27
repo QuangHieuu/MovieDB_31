@@ -25,8 +25,15 @@ public class ListMovieAdapter extends RecyclerView.Adapter<ListMovieAdapter.View
         if (mMovieList != null) {
             mMovieList.clear();
         }
-        mMovieList.addAll(movies);
+        mMovieList = movies;
         notifyDataSetChanged();
+    }
+
+    public void loadMoreMovie(List<Movie> movies) {
+        if (movies != null) {
+            mMovieList.addAll(movies);
+            notifyDataSetChanged();
+        }
     }
 
     @NonNull

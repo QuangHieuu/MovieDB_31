@@ -35,6 +35,11 @@ public class ListGenresViewModel {
                     public void accept(BaseModel genresBaseModel) throws Exception {
                         mListGenresAdapter.setGenresList(genresBaseModel.getGenres());
                     }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+
+                    }
                 });
         mCompositeDisposable.add(disposable);
     }

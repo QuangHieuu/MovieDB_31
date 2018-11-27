@@ -8,6 +8,8 @@ public class BaseCredit {
     private List<Actor> mActorList;
     @SerializedName("crew")
     private List<Production> mProductionList;
+    @SerializedName("results")
+    private List<Video> mVideoList;
 
     public List<Actor> getActorList() {
         return mActorList;
@@ -15,5 +17,13 @@ public class BaseCredit {
 
     public List<Production> getProductionList() {
         return mProductionList;
+    }
+
+    public List<Video> getVideoList() {
+        return mVideoList;
+    }
+
+    public void setVideoList(List<Video> videoList) {
+        mVideoList = videoList;
     }
 }

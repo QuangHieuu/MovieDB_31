@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import com.framgia.moviedb_31.R;
 import com.framgia.moviedb_31.databinding.ActivityMovieDetailBinding;
+import com.framgia.moviedb_31.screen.Youtube;
 
 public class MovieDetailActivity extends AppCompatActivity {
     private ActivityMovieDetailBinding mBinding;
@@ -26,6 +28,13 @@ public class MovieDetailActivity extends AppCompatActivity {
         MovieDetailViewModel viewModel =
                 new MovieDetailViewModel(getIntent().getStringExtra(EXTRA_KEY));
         mBinding.setViewModel(viewModel);
+        mBinding.textViewTrailer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(Youtube.getIntentYoutube(MovieDetailActivity.this,
+                        mBinding.getViewModel().getKeyYoutube()));
+            }
+        });
     }
 
     @Override

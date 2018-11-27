@@ -62,6 +62,11 @@ public class MainViewModel {
                     public void accept(BaseModel baseModel) throws Exception {
                         onGetDataSuccess(category, baseModel);
                     }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+
+                    }
                 });
         mCompositeDisposable.add(disposable);
     }
@@ -84,6 +89,14 @@ public class MainViewModel {
 
     public List<String> getImagePoster() {
         List<String> imageList = new ArrayList();
+        imageList.add("https://image.tmdb.org/t/p/w500/nDS8rddEK74HfAwCC5CoT6Cwzlt.jpg");
+        imageList.add("https://image.tmdb.org/t/p/w500/g8M39ttfQJDE1ocZFvjGS8iIFi7.jpg");
+        imageList.add("https://image.tmdb.org/t/p/w500/urntO2GG4LZanHdYjeCh6Do2krF.jpg");
+        imageList.add("https://image.tmdb.org/t/p/w500/12T5sdSInLxMEVHFwrb9kyeHI7D.jpg");
         return imageList;
+    }
+
+    public void onStop() {
+        mCompositeDisposable.clear();
     }
 }
